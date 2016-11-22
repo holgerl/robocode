@@ -21,8 +21,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         while (true) {
 
             calculateIntersections();
-
-            turnToClosestIntersection();
+            moveBot();
 
             execute();
 
@@ -32,7 +31,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         }
     }
 
-    private void turnToClosestIntersection() {
+    private void moveBot() {
         Vector position = new Vector(getX(), getY());
         Double leftLength = leftIntersection.clone().sub(position).length();
         Double rightLength = rightIntersection.clone().sub(position).length();
