@@ -8,12 +8,17 @@ import robocode.ScannedRobotEvent;
 import java.awt.*;
 import java.util.Arrays;
 
+import static no.holger.Utils.clamp;
+
 // C:\Users\Holger Ludvigsen\Dropbox-new\Dropbox\robocode\out\production\robocode
 public class PWNBOT4000 extends AdvancedRobot {
 
     Vector leftIntersection;
     Vector rightIntersection;
     Long timeLastTurn = 0L;
+    private boolean sawTarget;
+    Double radarDirection = 1.0;
+    private long lastScannedRobotTime = 0L;
 
     public void run() {
         Colors.applyColors(this);
@@ -22,6 +27,7 @@ public class PWNBOT4000 extends AdvancedRobot {
 
             calculateIntersections();
             moveBot();
+            moveGunRadar();
 
             execute();
 
@@ -42,8 +48,10 @@ public class PWNBOT4000 extends AdvancedRobot {
         Double shortestLength = leftLength < rightLength ? leftLength : rightLength;
         Double turnFactor = 1 + 1/shortestLength * 600;
 
-        Double speedFactor = Utils.clamp(shortestLength / 200, 1.0/8, 1.0);
+        Double speedFactor = clamp(shortestLength / 200, 1.0 / 8, 1.0);
 
+        setDebugProperty("speedFactor", speedFactor.toString());
+        
         this.setMaxVelocity(Rules.MAX_VELOCITY * speedFactor);
         setAhead(500);
 
@@ -99,6 +107,28 @@ public class PWNBOT4000 extends AdvancedRobot {
         return null;
     }
 
+
+    private void moveGunRadar() {
+        setAdjustGunForRobotTurn(true);
+        long diffSinceLastScan = getTime() - lastScannedRobotTime;
+
+        if (diffSinceLastScan == 0) {
+            //setTurnGunRightRadians(0.0);
+            //return;
+        } else if (diffSinceLastScan == 1) {
+            radarDirection *= -1;
+        }
+
+        Double turnFactor = clamp(diffSinceLastScan/5.0, 0.1, 1.0);
+
+        setTurnGunRightRadians(0.2 * turnFactor * radarDirection);
+    }
+
+    public void onScannedRobot(ScannedRobotEvent e) {
+        lastScannedRobotTime = getTime();
+        setFire(2);
+    }
+
     public void onHitRobot(HitRobotEvent e) {
         // If he's in front of us, set back up a bit.
         if (e.getBearing() > -90 && e.getBearing() < 90) {
@@ -106,9 +136,5 @@ public class PWNBOT4000 extends AdvancedRobot {
         } else { // else he's in back of us, so set ahead a bit.
             ahead(100);
         }
-    }
-
-    public void onScannedRobot(ScannedRobotEvent e) {
-        fire(2);
     }
 }
