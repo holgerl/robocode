@@ -65,11 +65,17 @@ public class Vector {
         return this;
     }
 
-    public void draw(Graphics2D g) {
+    public void draw(Graphics2D g, Color color) {
+        g.setColor(color);
         g.fillOval((int) x - 5, (int) y - 5, 10, 10);
     }
 
+    public void draw(Graphics2D g) {
+        draw(g, java.awt.Color.RED);
+    }
+
     public void drawLine(Vector endVector, Graphics2D g) {
+        g.setColor(java.awt.Color.RED);
         g.drawLine(
                 (int) x,
                 (int) y,
@@ -80,5 +86,12 @@ public class Vector {
 
     public boolean isInsideBox(Double x0, Double y0, Double x1, Double y1) {
         return x >= x0 && x <= x1 && y >= y0 && y <= y1;
+    }
+
+    public Double angleTo(Vector other) {
+        Vector thisNormalized = this.clone().normalize();
+        Vector otherNormalized = other.normalize();
+        // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
+        return Math.atan2(thisNormalized.y, thisNormalized.x) - Math.atan2(otherNormalized.y, otherNormalized.x);
     }
 }
