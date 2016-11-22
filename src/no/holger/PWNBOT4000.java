@@ -47,8 +47,8 @@ public class PWNBOT4000 extends AdvancedRobot {
         this.setMaxVelocity(Rules.MAX_VELOCITY * speedFactor);
         setAhead(500);
 
-        if (System.currentTimeMillis() - timeLastTurn > 1000) {
-            timeLastTurn = System.currentTimeMillis();
+        if (getTime() - timeLastTurn > 30) {
+            timeLastTurn = getTime();
             Double degrees = 360.0 * direction;
             setTurnRightRadians(Math.PI / 180 * degrees);
         }
