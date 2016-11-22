@@ -2,11 +2,13 @@ package no.holger;
 
 import robocode.AdvancedRobot;
 import robocode.HitRobotEvent;
+import robocode.Rules;
 import robocode.ScannedRobotEvent;
 
 import java.awt.*;
 import java.util.Arrays;
 
+// C:\Users\Holger Ludvigsen\Dropbox-new\Dropbox\robocode\out\production\robocode
 public class PWNBOT4000 extends AdvancedRobot {
 
     Vector leftIntersection;
@@ -17,11 +19,10 @@ public class PWNBOT4000 extends AdvancedRobot {
         Colors.applyColors(this);
 
         while (true) {
-            if (System.currentTimeMillis() - timeLastTurn > 500) {
-                timeLastTurn = System.currentTimeMillis();
-                calculateIntersections();
-                turnToClosestIntersection();
-            }
+
+            calculateIntersections();
+
+            turnToClosestIntersection();
 
             execute();
 
@@ -36,9 +37,22 @@ public class PWNBOT4000 extends AdvancedRobot {
         Double leftLength = leftIntersection.clone().sub(position).length();
         Double rightLength = rightIntersection.clone().sub(position).length();
 
+        Double direction = leftLength < rightLength ? 1.0 : -1.0;
+        if (leftLength > 200 && rightLength > 200) direction = Math.signum(Math.random()*2-1);
+
+        Double shortestLength = leftLength < rightLength ? leftLength : rightLength;
+        Double turnFactor = 1 + 1/shortestLength * 600;
+
+        Double speedFactor = Utils.clamp(shortestLength / 200, 1.0/8, 1.0);
+
+        this.setMaxVelocity(Rules.MAX_VELOCITY * speedFactor);
         setAhead(500);
-        Double degrees = leftLength < rightLength ? 200.0 : -200;
-        setTurnRightRadians(Math.PI / 180 * degrees);
+
+        if (System.currentTimeMillis() - timeLastTurn > 1000) {
+            timeLastTurn = System.currentTimeMillis();
+            Double degrees = 360.0 * direction;
+            setTurnRightRadians(Math.PI / 180 * degrees);
+        }
     }
 
     private void calculateIntersections() {
