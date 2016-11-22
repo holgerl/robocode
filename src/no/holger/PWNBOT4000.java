@@ -16,12 +16,16 @@ public class PWNBOT4000 extends AdvancedRobot {
     Vector leftIntersection;
     Vector rightIntersection;
     Long timeLastTurn = 0L;
-    private boolean sawTarget;
     Double radarDirection = 1.0;
     private long lastScannedRobotTime = 0L;
+    private ScannedRobotEvent lastScannedRobotEvent;
 
     public void run() {
         Colors.applyColors(this);
+
+        setAdjustGunForRobotTurn(true);
+        setAdjustRadarForGunTurn(true);
+        setAdjustRadarForRobotTurn(true);
 
         while (true) {
 
@@ -51,7 +55,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         Double speedFactor = clamp(shortestLength / 200, 1.0 / 8, 1.0);
 
         setDebugProperty("speedFactor", speedFactor.toString());
-        
+
         this.setMaxVelocity(Rules.MAX_VELOCITY * speedFactor);
         setAhead(500);
 
@@ -75,8 +79,6 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     @Override
     public void onPaint(Graphics2D g) {
-        g.setColor(java.awt.Color.RED);
-
         Vector position = new Vector(getX(), getY());
 
         position.drawLine(leftIntersection, g);
@@ -84,6 +86,27 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         leftIntersection.draw(g);
         rightIntersection.draw(g);
+
+        if (lastScannedRobotEvent != null) {
+            getLastScannedRobotPosition().draw(g, java.awt.Color.YELLOW);
+            getExpectedBulletHitPosition().draw(g, java.awt.Color.GREEN);
+        }
+
+    }
+
+    private Vector getExpectedBulletHitPosition() {
+        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(2);
+        Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
+        double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
+        return getLastScannedRobotPosition().add(
+                scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsForBulletToHit)
+        );
+    }
+
+    private Vector getLastScannedRobotPosition() {
+        Vector position = new Vector(getX(), getY());
+        Vector direction = new Vector(getHeadingRadians() + lastScannedRobotEvent.getBearingRadians());
+        return position.clone().add(direction.multiply(lastScannedRobotEvent.getDistance()));
     }
 
     public Vector getRayBattlefieldIntersection(Ray ray) {
@@ -97,7 +120,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         for (Ray edge : edges) {
             Vector intersection = ray.intersection(edge);
             if (intersection != null && intersection.isInsideBox(-1.0, -1.0, getBattleFieldWidth(), getBattleFieldHeight())) {
-                System.out.println(intersection.toString());
+                //System.out.println(intersection.toString());
                 return intersection;
             }
         }
@@ -109,24 +132,33 @@ public class PWNBOT4000 extends AdvancedRobot {
 
 
     private void moveGunRadar() {
-        setAdjustGunForRobotTurn(true);
         long diffSinceLastScan = getTime() - lastScannedRobotTime;
 
-        if (diffSinceLastScan == 0) {
-            //setTurnGunRightRadians(0.0);
-            //return;
+        if (diffSinceLastScan == 10) {
+            //radarDirection *= -1;
         } else if (diffSinceLastScan == 1) {
             radarDirection *= -1;
         }
 
         Double turnFactor = clamp(diffSinceLastScan/5.0, 0.1, 1.0);
 
+        setTurnRadarRightRadians(0.2 * turnFactor * radarDirection);
         setTurnGunRightRadians(0.2 * turnFactor * radarDirection);
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
         lastScannedRobotTime = getTime();
-        setFire(2);
+        lastScannedRobotEvent = e;
+
+        Vector position = new Vector(getX(), getY());
+        Vector targetGunDirection = getExpectedBulletHitPosition().sub(position).normalize();
+        Vector gunDirection = new Vector(getGunHeadingRadians());
+        Double angleBetween = gunDirection.angleTo(targetGunDirection);
+
+        setDebugProperty("angleBetween", angleBetween.toString());
+
+        turnGunRightRadians(angleBetween);
+        if (angleBetween < 0.05) setFire(2);
     }
 
     public void onHitRobot(HitRobotEvent e) {
