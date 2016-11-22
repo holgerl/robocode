@@ -134,16 +134,19 @@ public class PWNBOT4000 extends AdvancedRobot {
     private void moveGunRadar() {
         long diffSinceLastScan = getTime() - lastScannedRobotTime;
 
-        if (diffSinceLastScan == 10) {
-            //radarDirection *= -1;
-        } else if (diffSinceLastScan == 1) {
-            radarDirection *= -1;
+        Double radians = 0.2;
+
+        if (diffSinceLastScan < 10 && lastScannedRobotEvent != null) {
+            Vector position = new Vector(getX(), getY());
+            Vector targetRadarDirection = getLastScannedRobotPosition().sub(position).normalize();
+            Vector radarDirection = new Vector(getRadarHeadingRadians());
+            Double angleBetween = radarDirection.angleTo(targetRadarDirection);
+
+            radians = angleBetween * 2; // Exaggerate to go past the enemy
         }
 
-        Double turnFactor = clamp(diffSinceLastScan/5.0, 0.1, 1.0);
-
-        setTurnRadarRightRadians(0.2 * turnFactor * radarDirection);
-        setTurnGunRightRadians(0.2 * turnFactor * radarDirection);
+        setTurnRadarRightRadians(radians);
+        setTurnGunRightRadians(radians);
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
