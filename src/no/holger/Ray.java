@@ -26,7 +26,7 @@ public class Ray {
         Double v = (dy * ad.x - dx * ad.y) / det;
 
         // u > 0 && v > 0 => intersection
-        System.out.println("U: " + u + " V: " + v);
+        //System.out.println("U: " + u + " V: " + v);
         if (u >= -0 && v >= -0)
             return as.add(ad.multiply(u));
         else {
