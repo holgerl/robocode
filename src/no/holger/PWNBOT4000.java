@@ -156,7 +156,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     private void moveRadar() {
         long diffSinceLastScan = getTime() - lastScannedRobotTime;
 
-        Double radians = 0.2;
+        Double radians = 100000.0;
 
         if (diffSinceLastScan < 6 && lastScannedRobotEvent != null) {
             Vector position = new Vector(getX(), getY());
