@@ -109,17 +109,17 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         if (lastScannedRobotEvent != null) {
             getLastScannedRobotPosition().draw(g, java.awt.Color.YELLOW);
-            getExpectedBulletHitPosition().draw(g, java.awt.Color.GREEN);
+            double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
+            getExpectedEnemyPosition(nofTurnsForBulletToHit).draw(g, java.awt.Color.GREEN);
         }
 
     }
 
-    private Vector getExpectedBulletHitPosition() {
-        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
+    private Vector getExpectedEnemyPosition(Double nofTurnsInFuture) {
         Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
         double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
         return getLastScannedRobotPosition().add(
-                scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsForBulletToHit)
+                scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
     }
 
@@ -178,7 +178,8 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     private Double getAngleBetweenExpectedHitAndGun() {
         Vector position = new Vector(getX(), getY());
-        Vector targetGunDirection = getExpectedBulletHitPosition().sub(position).normalize();
+        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
+        Vector targetGunDirection = getExpectedEnemyPosition(nofTurnsForBulletToHit).sub(position).normalize();
         Vector gunDirection = new Vector(getGunHeadingRadians());
         return gunDirection.angleTo(targetGunDirection);
     }
