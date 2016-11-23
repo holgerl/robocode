@@ -13,6 +13,7 @@ import static no.holger.Utils.clamp;
 // C:\Users\Holger Ludvigsen\Dropbox-new\Dropbox\robocode\out\production\robocode
 public class PWNBOT4000 extends AdvancedRobot {
 
+    public static final int bulletPower = 1;
     Vector leftIntersection;
     Vector rightIntersection;
     Long timeLastTurn = 0L;
@@ -28,16 +29,25 @@ public class PWNBOT4000 extends AdvancedRobot {
         setAdjustRadarForRobotTurn(true);
 
         while (true) {
-
             calculateIntersections();
+
+            if (lastScannedRobotEvent != null) {
+                Double angleBetween = getAngleBetweenExpectedHitAndGun();
+
+//                long diffSinceLastScan = getTime() - lastScannedRobotTime;
+                setTurnGunRightRadians(angleBetween);
+
+                if (angleBetween < 0.05) setFire(bulletPower);
+            }
+
             moveBot();
             moveGunRadar();
-
-            execute();
 
             setDebugProperty("headingVector", new Vector(getHeadingRadians()).toString());
             setDebugProperty("headingVectorLeft", new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * 20).toString());
             setDebugProperty("headingVectorRight", new Vector(getHeadingRadians()).rotateLeft(- Math.PI / 180 * 20).toString());
+
+            execute();
         }
     }
 
@@ -95,7 +105,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
     private Vector getExpectedBulletHitPosition() {
-        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(2);
+        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
         Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
         double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
         return getLastScannedRobotPosition().add(
@@ -146,22 +156,23 @@ public class PWNBOT4000 extends AdvancedRobot {
         }
 
         setTurnRadarRightRadians(radians);
-        setTurnGunRightRadians(radians);
+        //setTurnGunRightRadians(radians);
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
         lastScannedRobotTime = getTime();
         lastScannedRobotEvent = e;
 
+        Double angleBetween = getAngleBetweenExpectedHitAndGun();
+
+        setDebugProperty("angleBetween", angleBetween.toString());
+    }
+
+    private Double getAngleBetweenExpectedHitAndGun() {
         Vector position = new Vector(getX(), getY());
         Vector targetGunDirection = getExpectedBulletHitPosition().sub(position).normalize();
         Vector gunDirection = new Vector(getGunHeadingRadians());
-        Double angleBetween = gunDirection.angleTo(targetGunDirection);
-
-        setDebugProperty("angleBetween", angleBetween.toString());
-
-        turnGunRightRadians(angleBetween);
-        if (angleBetween < 0.05) setFire(2);
+        return gunDirection.angleTo(targetGunDirection);
     }
 
     public void onHitRobot(HitRobotEvent e) {
