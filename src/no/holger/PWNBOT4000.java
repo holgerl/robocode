@@ -118,9 +118,12 @@ public class PWNBOT4000 extends AdvancedRobot {
     private Vector getExpectedEnemyPosition(Double nofTurnsInFuture) {
         Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
         double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
-        return getLastScannedRobotPosition().add(
+        Vector expectedPosition = getLastScannedRobotPosition().add(
                 scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
+        expectedPosition.x = clamp(expectedPosition.x, 0.0, getBattleFieldWidth());
+        expectedPosition.y = clamp(expectedPosition.y, 0.0, getBattleFieldHeight());
+        return expectedPosition;
     }
 
     private Vector getLastScannedRobotPosition() {
