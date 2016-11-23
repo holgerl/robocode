@@ -18,8 +18,11 @@ public class PWNBOT4000 extends AdvancedRobot {
     Vector rightIntersection;
     Long timeLastTurn = 0L;
     Double radarDirection = 1.0;
-    private long lastScannedRobotTime = 0L;
+    private Long lastScannedRobotTime = 0L;
     private ScannedRobotEvent lastScannedRobotEvent;
+
+    private static Long ticksWithScannedRobot = 0L;
+    private static Long totalTicks = 0L;
 
     public void run() {
         Colors.applyColors(this);
@@ -34,7 +37,6 @@ public class PWNBOT4000 extends AdvancedRobot {
             if (lastScannedRobotEvent != null) {
                 Double angleBetween = getAngleBetweenExpectedHitAndGun();
 
-//                long diffSinceLastScan = getTime() - lastScannedRobotTime;
                 setTurnGunRightRadians(angleBetween);
 
                 if (angleBetween < 0.05
@@ -42,8 +44,12 @@ public class PWNBOT4000 extends AdvancedRobot {
                         ) setFire(bulletPower);
             }
 
+            if (getTime() == lastScannedRobotTime) ticksWithScannedRobot++;
+            totalTicks++;
+            setDebugProperty("scanRatio", Double.toString(ticksWithScannedRobot.doubleValue() / totalTicks));
+
             moveBot();
-            moveGunRadar();
+            moveRadar();
 
             setDebugProperty("headingVector", new Vector(getHeadingRadians()).toString());
             setDebugProperty("headingVectorLeft", new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * 20).toString());
@@ -134,7 +140,6 @@ public class PWNBOT4000 extends AdvancedRobot {
         for (Ray edge : edges) {
             Vector intersection = ray.intersection(edge);
             if (intersection != null && intersection.isInsideBox(-1.0, -1.0, getBattleFieldWidth(), getBattleFieldHeight())) {
-                //System.out.println(intersection.toString());
                 return intersection;
             }
         }
@@ -145,22 +150,21 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
 
-    private void moveGunRadar() {
+    private void moveRadar() {
         long diffSinceLastScan = getTime() - lastScannedRobotTime;
 
         Double radians = 0.2;
 
-        if (diffSinceLastScan < 10 && lastScannedRobotEvent != null) {
+        if (diffSinceLastScan < 3 && lastScannedRobotEvent != null) {
             Vector position = new Vector(getX(), getY());
             Vector targetRadarDirection = getLastScannedRobotPosition().sub(position).normalize();
             Vector radarDirection = new Vector(getRadarHeadingRadians());
             Double angleBetween = radarDirection.angleTo(targetRadarDirection);
 
-            radians = angleBetween * 2; // Exaggerate to go past the enemy
+            radians = angleBetween;
         }
 
         setTurnRadarRightRadians(radians);
-        //setTurnGunRightRadians(radians);
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
