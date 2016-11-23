@@ -13,7 +13,7 @@ import static no.holger.Utils.clamp;
 // C:\Users\Holger Ludvigsen\Dropbox-new\Dropbox\robocode\out\production\robocode
 public class PWNBOT4000 extends AdvancedRobot {
 
-    public static final int bulletPower = 1;
+    public static final Double bulletPower = Rules.MAX_BULLET_POWER;
     Vector leftIntersection;
     Vector rightIntersection;
     Long timeLastTurn = 0L;
@@ -37,7 +37,9 @@ public class PWNBOT4000 extends AdvancedRobot {
 //                long diffSinceLastScan = getTime() - lastScannedRobotTime;
                 setTurnGunRightRadians(angleBetween);
 
-                if (angleBetween < 0.05) setFire(bulletPower);
+                if (angleBetween < 0.05
+//                        && getExpectedBulletHitPosition().isInsideBox(-50.0, -50.0, getBattleFieldWidth()+50, getBattleFieldHeight()+50)
+                        ) setFire(bulletPower);
             }
 
             moveBot();
