@@ -155,9 +155,9 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         Double radians = 0.2;
 
-        if (diffSinceLastScan < 3 && lastScannedRobotEvent != null) {
+        if (diffSinceLastScan < 6 && lastScannedRobotEvent != null) {
             Vector position = new Vector(getX(), getY());
-            Vector targetRadarDirection = getExpectedEnemyPosition(1.0).sub(position).normalize();
+            Vector targetRadarDirection = getExpectedEnemyPosition(2.0).sub(position).normalize();
             Vector radarDirection = new Vector(getRadarHeadingRadians());
             Double angleBetween = radarDirection.angleTo(targetRadarDirection);
 
