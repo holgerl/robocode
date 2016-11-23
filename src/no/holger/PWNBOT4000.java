@@ -54,6 +54,8 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
     private void moveBot() {
+        //setAhead(500); setTurnRightRadians(Math.PI / 180 * 3); if (true) return;
+
         Vector position = new Vector(getX(), getY());
         Double leftLength = leftIntersection.clone().sub(position).length();
         Double rightLength = rightIntersection.clone().sub(position).length();
@@ -178,11 +180,11 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
     public void onHitRobot(HitRobotEvent e) {
-        // If he's in front of us, set back up a bit.
-        if (e.getBearing() > -90 && e.getBearing() < 90) {
-            back(100);
-        } else { // else he's in back of us, so set ahead a bit.
-            ahead(100);
-        }
+//        // If he's in front of us, set back up a bit.
+//        if (e.getBearing() > -90 && e.getBearing() < 90) {
+//            back(100);
+//        } else { // else he's in back of us, so set ahead a bit.
+//            ahead(100);
+//        }
     }
 }
