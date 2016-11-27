@@ -16,8 +16,8 @@ public class PWNBOT4000 extends AdvancedRobot {
     private static final Double bulletPower = Rules.MAX_BULLET_POWER;
     private Vector leftIntersection;
     private Vector rightIntersection;
-    private Long timeLastTurn = 0L;
-    private Long lastScannedRobotTime = 0L;
+    private Long timeLastTurn = -10000L;
+    private Long lastScannedRobotTime = -10000L;
     private ScannedRobotEvent lastScannedRobotEvent;
     private Vector lastScannedRobotPosition;
 
