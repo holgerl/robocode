@@ -34,7 +34,8 @@ public class PWNBOT4000 extends AdvancedRobot {
         while (true) {
             if (getTime() == lastScannedRobotTime) ticksWithScannedRobot++;
             totalTicks++;
-            setDebugProperty("scanRatio", Double.toString(ticksWithScannedRobot.doubleValue() / totalTicks));
+
+            if (lastScannedRobotEvent != null) setDebugProperties();
 
             calculateIntersections();
 
@@ -45,6 +46,22 @@ public class PWNBOT4000 extends AdvancedRobot {
 
             execute();
         }
+    }
+
+    private void setDebugProperty(String key, Object value) {
+        setDebugProperty(key, value != null ? value.toString() : "null");
+    }
+
+    private void setDebugProperties() {
+        setDebugProperty("scanRatio", Double.toString(ticksWithScannedRobot.doubleValue() / totalTicks));
+        setDebugProperty("lastScannedRobotPosition", lastScannedRobotPosition);
+        setDebugProperty("lastScannedRobotTime", lastScannedRobotTime);
+        setDebugProperty("lastScannedRobotEvent.velocity", lastScannedRobotEvent.getVelocity());
+        setDebugProperty("lastScannedRobotEvent.distance", Double.toString(lastScannedRobotEvent.getDistance()));
+        setDebugProperty("lastScannedRobotEvent.heading", Double.toString(lastScannedRobotEvent.getHeadingRadians()));
+        setDebugProperty("lastScannedRobotEvent.bearing", Double.toString(lastScannedRobotEvent.getBearingRadians()));
+        setDebugProperty("angleBetween", getAngleBetweenExpectedHitAndGun().toString());
+        setDebugProperty("getTime", Long.toString(getTime()));
     }
 
     private void fireGun() {
@@ -126,7 +143,18 @@ public class PWNBOT4000 extends AdvancedRobot {
                 scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
 
-        // TODO: clamp to battlefield edges
+        System.out.println("expectedPosition 1 " + expectedPosition.toString());
+
+        if (!expectedPosition.isInsideBox(0.0, 0.0, getBattleFieldWidth(), getBattleFieldHeight())) {
+            Vector rayBattlefieldIntersection = getRayBattlefieldIntersection(new Ray(lastScannedRobotPosition, expectedPosition.clone().sub(lastScannedRobotPosition)));
+            System.out.println("expectedPosition inside " + expectedPosition.toString());
+            System.out.println("rayBattlefieldIntersection " + rayBattlefieldIntersection.toString());
+            return rayBattlefieldIntersection;
+        }
+
+        if (expectedPosition.x == lastScannedRobotPosition.x && expectedPosition.y == lastScannedRobotPosition.y) {
+            System.out.println("expectedPosition 2 " + expectedPosition.toString());
+        }
 
         return expectedPosition;
     }
@@ -181,10 +209,6 @@ public class PWNBOT4000 extends AdvancedRobot {
         lastScannedRobotTime = getTime();
         lastScannedRobotEvent = e; // TODO: Replace with lastScannedRobotVelocity and lastScannedRobotDirection
         lastScannedRobotPosition = estimateLastScannedRobotPosition(e);
-
-        Double angleBetween = getAngleBetweenExpectedHitAndGun();
-
-        setDebugProperty("angleBetween", angleBetween.toString());
     }
 
     private Double getAngleBetweenExpectedHitAndGun() {
