@@ -6,6 +6,8 @@ import robocode.Rules;
 import robocode.ScannedRobotEvent;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 
 import static no.holger.Utils.clamp;
@@ -14,12 +16,14 @@ import static no.holger.Utils.clamp;
 public class PWNBOT4000 extends AdvancedRobot {
 
     private static final Double bulletPower = Rules.MAX_BULLET_POWER;
+    public static final int TICKS_BETWEEN_HISTORY = 3;
     private Vector leftIntersection;
     private Vector rightIntersection;
     private Long timeLastTurn = -10000L;
     private Long lastScannedRobotTime = -10000L;
     private ScannedRobotEvent lastScannedRobotEvent;
     private Vector lastScannedRobotPosition;
+    private List<Vector> lastPositions = new ArrayList<>();
 
     private static Long ticksWithScannedRobot = 0L;
     private static Long totalTicks = 0L;
@@ -44,6 +48,11 @@ public class PWNBOT4000 extends AdvancedRobot {
             moveGun();
             fireGun();
 
+            if (getTime() % TICKS_BETWEEN_HISTORY == 0 && lastScannedRobotPosition != null) {
+                lastPositions.add(lastScannedRobotPosition.clone());
+                if (lastPositions.size() > 3) lastPositions.remove(0);
+            }
+
             execute();
         }
     }
@@ -62,13 +71,14 @@ public class PWNBOT4000 extends AdvancedRobot {
         setDebugProperty("lastScannedRobotEvent.bearing", Double.toString(lastScannedRobotEvent.getBearingRadians()));
         setDebugProperty("angleBetween", getAngleBetweenExpectedHitAndGun().toString());
         setDebugProperty("getTime", Long.toString(getTime()));
+        setDebugProperty("getLinearDeviation", getLinearDeviation());
     }
 
     private void fireGun() {
         if (lastScannedRobotPosition != null) {
             long diffSinceLastScan = getTime() - lastScannedRobotTime;
             Double angleBetween = getAngleBetweenExpectedHitAndGun();
-            if (diffSinceLastScan == 0 && angleBetween < 0.05) setFire(bulletPower);
+            if (diffSinceLastScan == 0) setFire(bulletPower);
         }
     }
 
@@ -126,17 +136,80 @@ public class PWNBOT4000 extends AdvancedRobot {
         leftIntersection.draw(g);
         rightIntersection.draw(g);
 
+        for (Vector lastPosition : lastPositions) {
+            lastPosition.draw(g, Color.GRAY);
+        }
+
+        //getExpectedEnemyPositionHistoric((double) 40).draw(g, Color.ORANGE);
+        //getExpectedEnemyPositionHistoric((double) 20).draw(g, Color.MAGENTA);
+//        getExpectedEnemyPositionHistoric((double) TICKS_BETWEEN_HISTORY).draw(g, Color.BLUE);
+        //getExpectedEnemyPositionHistoric((double) 5).draw(g, Color.RED);
+        //getExpectedEnemyPositionHistoric((double) 2).draw(g, Color.CYAN);
+
         if (lastScannedRobotPosition != null) {
             lastScannedRobotPosition.draw(g, java.awt.Color.YELLOW);
             double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
             getExpectedEnemyPosition(nofTurnsForBulletToHit).draw(g, java.awt.Color.GREEN);
+            getExpectedEnemyPositionHistoric((double) TICKS_BETWEEN_HISTORY).draw(g, Color.BLUE);
+            getExpectedEnemyPositionLinearDeviated(nofTurnsForBulletToHit).draw(g, Color.ORANGE);
 
             lastScannedRobotPosition.drawLine(lastScannedRobotPosition.clone().add(new Vector(lastScannedRobotEvent.getHeadingRadians()).multiply(10 * lastScannedRobotEvent.getVelocity())), g);
         }
 
     }
 
+    private Vector getExpectedEnemyPositionLinearDeviated(Double nofTurnsForBulletToHit) {
+        Vector linearPos = getExpectedEnemyPositionLinear(nofTurnsForBulletToHit);
+        Vector positionToExpected = linearPos.clone().sub(lastScannedRobotPosition);
+        Vector linearDirection = positionToExpected.clone().normalize();
+        Vector directionDeviated = linearDirection.clone().rotateLeft(-getLinearDeviation());
+
+        return lastScannedRobotPosition.clone().add(directionDeviated.clone().multiply(positionToExpected.length()));
+    }
+
     private Vector getExpectedEnemyPosition(Double nofTurnsInFuture) {
+//        return getExpectedEnemyPositionLinearDeviated(nofTurnsInFuture);
+        return getExpectedEnemyPositionLinear(nofTurnsInFuture);
+    }
+
+    private Vector getExpectedEnemyPositionHistoric(Double nofTurnsInFuture) {
+        if (lastPositions.size() < 3) return getExpectedEnemyPositionLinear(nofTurnsInFuture);
+
+        Vector a = lastPositions.get(0);
+        Vector b = lastPositions.get(1);
+        Vector c = lastPositions.get(2);
+
+        Vector ab = b.clone().sub(a);
+        Vector bc = c.clone().sub(b);
+        Double abcAngle = ab.angleTo(bc);
+        Double bcLength = bc.length();
+
+        Vector bcNormalized = bc.clone().normalize();
+        Vector cdNormalized = bcNormalized.rotateLeft(-abcAngle);
+        Vector cd = cdNormalized.multiply(bcLength * nofTurnsInFuture/TICKS_BETWEEN_HISTORY);
+        Vector d = c.clone().add(cd);
+
+        System.out.println(a.toString() + b.toString() + c.toString());
+        System.out.println(ab.toString() + bc.toString() + abcAngle.toString() + cdNormalized.toString() + cd);
+
+        return d;
+    }
+
+    private Double getLinearDeviation() {
+        if (lastPositions.size() < 3) return 0.0;
+
+        Vector a = lastPositions.get(0);
+        Vector b = lastPositions.get(1);
+        Vector c = lastPositions.get(2);
+
+        Vector ab = b.clone().sub(a);
+        Vector bc = c.clone().sub(b);
+        Double abcAngle = ab.angleTo(bc);
+
+        return abcAngle;
+    }
+
+    private Vector getExpectedEnemyPositionLinear(Double nofTurnsInFuture) {
         Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
         double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
         Vector expectedPosition = lastScannedRobotPosition.clone().add(
