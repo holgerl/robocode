@@ -137,7 +137,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         rightIntersection.draw(g);
 
         for (Vector lastPosition : lastPositions) {
-            lastPosition.draw(g, Color.GRAY);
+//            lastPosition.draw(g, Color.GRAY);
         }
 
         //getExpectedEnemyPositionHistoric((double) 40).draw(g, Color.ORANGE);
@@ -150,7 +150,7 @@ public class PWNBOT4000 extends AdvancedRobot {
             lastScannedRobotPosition.draw(g, java.awt.Color.YELLOW);
             double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
             getExpectedEnemyPosition(nofTurnsForBulletToHit).draw(g, java.awt.Color.GREEN);
-            getExpectedEnemyPositionHistoric((double) TICKS_BETWEEN_HISTORY).draw(g, Color.BLUE);
+//            getExpectedEnemyPositionHistoric((double) TICKS_BETWEEN_HISTORY).draw(g, Color.BLUE);
             getExpectedEnemyPositionLinearDeviated(nofTurnsForBulletToHit).draw(g, Color.ORANGE);
 
             lastScannedRobotPosition.drawLine(lastScannedRobotPosition.clone().add(new Vector(lastScannedRobotEvent.getHeadingRadians()).multiply(10 * lastScannedRobotEvent.getVelocity())), g);
@@ -188,9 +188,6 @@ public class PWNBOT4000 extends AdvancedRobot {
         Vector cdNormalized = bcNormalized.rotateLeft(-abcAngle);
         Vector cd = cdNormalized.multiply(bcLength * nofTurnsInFuture/TICKS_BETWEEN_HISTORY);
         Vector d = c.clone().add(cd);
-
-        System.out.println(a.toString() + b.toString() + c.toString());
-        System.out.println(ab.toString() + bc.toString() + abcAngle.toString() + cdNormalized.toString() + cd);
 
         return d;
     }
