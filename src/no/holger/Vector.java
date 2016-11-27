@@ -47,6 +47,10 @@ public class Vector {
         return this;
     }
 
+    public Double distanceTo(Vector other) {
+        return other.clone().sub(this).length();
+    }
+
     public Double length() {
         return Math.sqrt(x*x + y*y);
     }
