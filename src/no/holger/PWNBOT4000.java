@@ -24,6 +24,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     private ScannedRobotEvent lastScannedRobotEvent;
     private Vector lastScannedRobotPosition;
     private List<Vector> lastPositions = new ArrayList<>();
+    private Double forwardOrBackwards = 1.0;
 
     private static Long ticksWithScannedRobot = 0L;
     private static Long totalTicks = 0L;
@@ -96,17 +97,19 @@ public class PWNBOT4000 extends AdvancedRobot {
         Double leftLength = leftIntersection.clone().sub(position).length();
         Double rightLength = rightIntersection.clone().sub(position).length();
 
-        Double direction = leftLength < rightLength ? 1.0 : -1.0;
-        if (leftLength > 200 && rightLength > 200) direction = Math.signum(Math.random()*2-1);
-
         Double shortestLength = leftLength < rightLength ? leftLength : rightLength;
 
         Double speedFactor = clamp(shortestLength / 150, 1.0 / 6, 1.0);
 
+        Double direction = leftLength < rightLength ? 1.0 : -1.0;
+        boolean farAwayFromEdges = leftLength > 200 && rightLength > 200;
+        if (farAwayFromEdges && speedFactor == 1.0) direction = Math.signum(Math.random()*2-1);
+//        if (!farAwayFromEdges && getTime() % 30 == 0) forwardOrBackwards =  Math.signum(Math.random()-0.5);
+
         setDebugProperty("speedFactor", speedFactor.toString());
 
         this.setMaxVelocity(Rules.MAX_VELOCITY * speedFactor);
-        setAhead(500);
+        setAhead(500 * forwardOrBackwards);
 
         if (getTime() - timeLastTurn > 30) {
             timeLastTurn = getTime();
@@ -116,8 +119,9 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
     private void calculateIntersections() {
-        Vector left = new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * 20);
-        Vector right = new Vector(getHeadingRadians()).rotateLeft(-Math.PI / 180 * 20);
+        int spread = 20;
+        Vector left = new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * spread);
+        Vector right = new Vector(getHeadingRadians()).rotateLeft(-Math.PI / 180 * spread);
 
         Vector position = new Vector(getX(), getY());
         Ray leftRay = new Ray(position, left);
