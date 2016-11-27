@@ -79,7 +79,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         if (lastScannedRobotPosition != null) {
             long diffSinceLastScan = getTime() - lastScannedRobotTime;
             Double angleBetween = getAngleBetweenExpectedHitAndGun();
-            if (diffSinceLastScan == 0) setFire(bulletPower);
+            if (diffSinceLastScan == 0 && angleBetween < 0.05) setFire(bulletPower);
         }
     }
 
