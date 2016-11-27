@@ -265,11 +265,12 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         if (diffSinceLastScan < 6 && lastScannedRobotPosition != null) {
             Vector position = new Vector(getX(), getY());
-            Vector targetRadarDirection = getExpectedEnemyPosition(2.0).sub(position).normalize();
+//            Vector targetRadarDirection = lastScannedRobotPosition.clone().sub(position).normalize();
+            Vector targetRadarDirection = getExpectedEnemyPosition((double) diffSinceLastScan).sub(position).normalize();
             Vector radarDirection = new Vector(getRadarHeadingRadians());
             Double angleBetween = radarDirection.angleTo(targetRadarDirection);
 
-            Double exaggeration = 2.0; // Exaggerate to scan past the enemy
+            Double exaggeration = 0.0; // Exaggerate to scan past the enemy
 
             radians = angleBetween + Math.signum(angleBetween)* Math.PI/180*exaggeration;
         }
@@ -289,6 +290,12 @@ public class PWNBOT4000 extends AdvancedRobot {
         Vector targetGunDirection = getExpectedEnemyPosition(nofTurnsForBulletToHit).sub(position).normalize();
         Vector gunDirection = new Vector(getGunHeadingRadians());
         return gunDirection.angleTo(targetGunDirection);
+    }
+
+    private Double getDistanceToExpectedEnemyPosition() {
+        Vector position = new Vector(getX(), getY());
+        double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
+        return getExpectedEnemyPosition(nofTurnsForBulletToHit).distanceTo(position);
     }
 
     public void onHitRobot(HitRobotEvent e) {
