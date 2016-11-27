@@ -217,7 +217,11 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         if (!expectedPosition.isInsideBox(0.0, 0.0, getBattleFieldWidth(), getBattleFieldHeight())) {
             Vector rayBattlefieldIntersection = getRayBattlefieldIntersection(new Ray(lastScannedRobotPosition, expectedPosition.clone().sub(lastScannedRobotPosition)));
-            return rayBattlefieldIntersection;
+            return rayBattlefieldIntersection.clone();
+
+//            Vector throughWall = expectedPosition.clone().sub(rayBattlefieldIntersection);
+//            Vector backlash = throughWall.clone().rotateLeft(Math.PI);
+//            return rayBattlefieldIntersection.clone().add(backlash);
         }
 
         return expectedPosition;
