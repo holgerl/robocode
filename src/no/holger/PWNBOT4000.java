@@ -143,17 +143,11 @@ public class PWNBOT4000 extends AdvancedRobot {
                 scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
 
-        System.out.println("expectedPosition 1 " + expectedPosition.toString());
+        System.out.println("expectedPosition 1 " + expectedPosition.toString()); // If this line is removed, expectedPosition sometimes equals lastScannedRobotPosition for some weird reason
 
         if (!expectedPosition.isInsideBox(0.0, 0.0, getBattleFieldWidth(), getBattleFieldHeight())) {
             Vector rayBattlefieldIntersection = getRayBattlefieldIntersection(new Ray(lastScannedRobotPosition, expectedPosition.clone().sub(lastScannedRobotPosition)));
-            System.out.println("expectedPosition inside " + expectedPosition.toString());
-            System.out.println("rayBattlefieldIntersection " + rayBattlefieldIntersection.toString());
             return rayBattlefieldIntersection;
-        }
-
-        if (expectedPosition.x == lastScannedRobotPosition.x && expectedPosition.y == lastScannedRobotPosition.y) {
-            System.out.println("expectedPosition 2 " + expectedPosition.toString());
         }
 
         return expectedPosition;
