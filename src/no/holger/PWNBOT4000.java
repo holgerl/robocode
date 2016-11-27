@@ -113,6 +113,8 @@ public class PWNBOT4000 extends AdvancedRobot {
             lastScannedRobotPosition.draw(g, java.awt.Color.YELLOW);
             double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
             getExpectedEnemyPosition(nofTurnsForBulletToHit).draw(g, java.awt.Color.GREEN);
+
+            lastScannedRobotPosition.drawLine(lastScannedRobotPosition.clone().add(new Vector(lastScannedRobotEvent.getHeadingRadians()).multiply(10 * lastScannedRobotEvent.getVelocity())), g);
         }
 
     }
