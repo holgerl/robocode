@@ -13,11 +13,10 @@ import static no.holger.Utils.clamp;
 // C:\Users\Holger Ludvigsen\Dropbox-new\Dropbox\robocode\out\production\robocode
 public class PWNBOT4000 extends AdvancedRobot {
 
-    public static final Double bulletPower = Rules.MAX_BULLET_POWER;
-    Vector leftIntersection;
-    Vector rightIntersection;
-    Long timeLastTurn = 0L;
-    Double radarDirection = 1.0;
+    private static final Double bulletPower = Rules.MAX_BULLET_POWER;
+    private Vector leftIntersection;
+    private Vector rightIntersection;
+    private Long timeLastTurn = 0L;
     private Long lastScannedRobotTime = 0L;
     private ScannedRobotEvent lastScannedRobotEvent;
     private Vector lastScannedRobotPosition;
@@ -33,32 +32,33 @@ public class PWNBOT4000 extends AdvancedRobot {
         setAdjustRadarForRobotTurn(true);
 
         while (true) {
-            calculateIntersections();
-
-            long diffSinceLastScan = getTime() - lastScannedRobotTime;
-
-            if (diffSinceLastScan == 0 && lastScannedRobotPosition != null) {
-                Double angleBetween = getAngleBetweenExpectedHitAndGun();
-
-                setTurnGunRightRadians(angleBetween);
-
-                if (angleBetween < 0.05
-//                        && getExpectedBulletHitPosition().isInsideBox(-50.0, -50.0, getBattleFieldWidth()+50, getBattleFieldHeight()+50)
-                        ) setFire(bulletPower);
-            }
-
             if (getTime() == lastScannedRobotTime) ticksWithScannedRobot++;
             totalTicks++;
             setDebugProperty("scanRatio", Double.toString(ticksWithScannedRobot.doubleValue() / totalTicks));
 
+            calculateIntersections();
+
             moveBot();
             moveRadar();
-
-            setDebugProperty("headingVector", new Vector(getHeadingRadians()).toString());
-            setDebugProperty("headingVectorLeft", new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * 20).toString());
-            setDebugProperty("headingVectorRight", new Vector(getHeadingRadians()).rotateLeft(- Math.PI / 180 * 20).toString());
+            moveGun();
+            fireGun();
 
             execute();
+        }
+    }
+
+    private void fireGun() {
+        if (lastScannedRobotPosition != null) {
+            long diffSinceLastScan = getTime() - lastScannedRobotTime;
+            Double angleBetween = getAngleBetweenExpectedHitAndGun();
+            if (diffSinceLastScan == 0 && angleBetween < 0.05) setFire(bulletPower);
+        }
+    }
+
+    private void moveGun() {
+        if (lastScannedRobotPosition != null) {
+            Double angleBetween = getAngleBetweenExpectedHitAndGun();
+            setTurnGunRightRadians(angleBetween);
         }
     }
 
@@ -73,7 +73,6 @@ public class PWNBOT4000 extends AdvancedRobot {
         if (leftLength > 200 && rightLength > 200) direction = Math.signum(Math.random()*2-1);
 
         Double shortestLength = leftLength < rightLength ? leftLength : rightLength;
-        Double turnFactor = 1 + 1/shortestLength * 600;
 
         Double speedFactor = clamp(shortestLength / 200, 1.0 / 8, 1.0);
 
@@ -136,7 +135,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         return estimate;
     }
 
-    public Vector getRayBattlefieldIntersection(Ray ray) {
+    private Vector getRayBattlefieldIntersection(Ray ray) {
         Ray bottomLine = new Ray(new Vector(0, 0), new Vector(1, 0));
         Ray topLine = new Ray(new Vector(0.0, getBattleFieldHeight()-1), new Vector(1, 0));
         Ray leftLine = new Ray(new Vector(0, 0), new Vector(0, 1));
