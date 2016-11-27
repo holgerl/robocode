@@ -125,8 +125,9 @@ public class PWNBOT4000 extends AdvancedRobot {
         Vector expectedPosition = lastScannedRobotPosition.clone().add(
                 scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
-        expectedPosition.x = clamp(expectedPosition.x, 0.0, getBattleFieldWidth());
-        expectedPosition.y = clamp(expectedPosition.y, 0.0, getBattleFieldHeight());
+
+        // TODO: clamp to battlefield edges
+
         return expectedPosition;
     }
 
