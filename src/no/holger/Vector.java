@@ -67,7 +67,8 @@ public class Vector {
 
     public void draw(Graphics2D g, Color color) {
         g.setColor(color);
-        g.fillOval((int) x - 5, (int) y - 5, 10, 10);
+        Integer radius = 20;
+        g.fillOval((int) x - radius/2, (int) y - radius/2, radius, radius);
     }
 
     public void draw(Graphics2D g) {
