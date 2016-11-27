@@ -95,7 +95,7 @@ public class Vector {
 
     public Double angleTo(Vector other) {
         Vector thisNormalized = this.clone().normalize();
-        Vector otherNormalized = other.normalize();
+        Vector otherNormalized = other.clone().normalize();
         // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
         return Math.atan2(thisNormalized.y, thisNormalized.x) - Math.atan2(otherNormalized.y, otherNormalized.x);
     }
