@@ -74,7 +74,7 @@ public class PWNBOT4000 extends AdvancedRobot {
 
         Double shortestLength = leftLength < rightLength ? leftLength : rightLength;
 
-        Double speedFactor = clamp(shortestLength / 200, 1.0 / 8, 1.0);
+        Double speedFactor = clamp(shortestLength / 150, 1.0 / 6, 1.0);
 
         setDebugProperty("speedFactor", speedFactor.toString());
 
