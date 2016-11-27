@@ -20,6 +20,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     Double radarDirection = 1.0;
     private Long lastScannedRobotTime = 0L;
     private ScannedRobotEvent lastScannedRobotEvent;
+    private Vector lastScannedRobotPosition;
 
     private static Long ticksWithScannedRobot = 0L;
     private static Long totalTicks = 0L;
@@ -34,7 +35,9 @@ public class PWNBOT4000 extends AdvancedRobot {
         while (true) {
             calculateIntersections();
 
-            if (lastScannedRobotEvent != null) {
+            long diffSinceLastScan = getTime() - lastScannedRobotTime;
+
+            if (diffSinceLastScan == 0 && lastScannedRobotPosition != null) {
                 Double angleBetween = getAngleBetweenExpectedHitAndGun();
 
                 setTurnGunRightRadians(angleBetween);
@@ -107,9 +110,9 @@ public class PWNBOT4000 extends AdvancedRobot {
         leftIntersection.draw(g);
         rightIntersection.draw(g);
 
-        if (lastScannedRobotEvent != null) {
-            getLastScannedRobotPosition().draw(g, java.awt.Color.YELLOW);
-            double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
+        if (lastScannedRobotPosition != null) {
+            lastScannedRobotPosition.draw(g, java.awt.Color.YELLOW);
+            double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
             getExpectedEnemyPosition(nofTurnsForBulletToHit).draw(g, java.awt.Color.GREEN);
         }
 
@@ -118,7 +121,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     private Vector getExpectedEnemyPosition(Double nofTurnsInFuture) {
         Vector scannedRobotHeading = new Vector(lastScannedRobotEvent.getHeadingRadians());
         double scannedRobotSpeed = lastScannedRobotEvent.getVelocity();
-        Vector expectedPosition = getLastScannedRobotPosition().add(
+        Vector expectedPosition = lastScannedRobotPosition.clone().add(
                 scannedRobotHeading.multiply(scannedRobotSpeed * nofTurnsInFuture)
         );
         expectedPosition.x = clamp(expectedPosition.x, 0.0, getBattleFieldWidth());
@@ -126,10 +129,11 @@ public class PWNBOT4000 extends AdvancedRobot {
         return expectedPosition;
     }
 
-    private Vector getLastScannedRobotPosition() {
+    private Vector estimateLastScannedRobotPosition(ScannedRobotEvent event) {
         Vector position = new Vector(getX(), getY());
-        Vector direction = new Vector(getHeadingRadians() + lastScannedRobotEvent.getBearingRadians());
-        return position.clone().add(direction.multiply(lastScannedRobotEvent.getDistance()));
+        Vector direction = new Vector(getHeadingRadians() + event.getBearingRadians());
+        Vector estimate = position.clone().add(direction.multiply(event.getDistance()));
+        return estimate;
     }
 
     public Vector getRayBattlefieldIntersection(Ray ray) {
@@ -152,13 +156,12 @@ public class PWNBOT4000 extends AdvancedRobot {
         return null;
     }
 
-
     private void moveRadar() {
         long diffSinceLastScan = getTime() - lastScannedRobotTime;
 
         Double radians = 100000.0;
 
-        if (diffSinceLastScan < 6 && lastScannedRobotEvent != null) {
+        if (diffSinceLastScan < 6 && lastScannedRobotPosition != null) {
             Vector position = new Vector(getX(), getY());
             Vector targetRadarDirection = getExpectedEnemyPosition(2.0).sub(position).normalize();
             Vector radarDirection = new Vector(getRadarHeadingRadians());
@@ -174,7 +177,8 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     public void onScannedRobot(ScannedRobotEvent e) {
         lastScannedRobotTime = getTime();
-        lastScannedRobotEvent = e;
+        lastScannedRobotEvent = e; // TODO: Replace with lastScannedRobotVelocity and lastScannedRobotDirection
+        lastScannedRobotPosition = estimateLastScannedRobotPosition(e);
 
         Double angleBetween = getAngleBetweenExpectedHitAndGun();
 
@@ -183,7 +187,7 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     private Double getAngleBetweenExpectedHitAndGun() {
         Vector position = new Vector(getX(), getY());
-        double nofTurnsForBulletToHit = lastScannedRobotEvent.getDistance() / Rules.getBulletSpeed(bulletPower);
+        double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
         Vector targetGunDirection = getExpectedEnemyPosition(nofTurnsForBulletToHit).sub(position).normalize();
         Vector gunDirection = new Vector(getGunHeadingRadians());
         return gunDirection.angleTo(targetGunDirection);
