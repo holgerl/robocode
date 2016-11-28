@@ -28,7 +28,7 @@ public class PWNBOT4000 extends AdvancedRobot {
     private Vector lastScannedRobotPosition;
     private List<Vector> lastPositions = new ArrayList<>();
     private List<Vector> futurePositions = new ArrayList<>();
-    private Double forwardOrBackwards = 1.0;
+    protected Double forwardOrBackwards = 1.0;
 
     private static Long ticksWithScannedRobot = 0L;
     private static Long totalTicks = 0L;
@@ -128,7 +128,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         }
     }
 
-    private void moveBot() {
+    protected void moveBot() {
         //setAhead(500); setTurnRightRadians(Math.PI / 180 * 3); if (true) return;
 
         Vector position = new Vector(getX(), getY());

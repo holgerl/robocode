@@ -14,6 +14,8 @@ import static no.holger.Utils.clamp;
 
 public class TargetPracticeCircle extends AdvancedRobot {
 
+    protected int forwardOrBackwards = 1;
+
     public void run() {
         Colors.applyColors(this);
 
@@ -27,8 +29,8 @@ public class TargetPracticeCircle extends AdvancedRobot {
         }
     }
 
-    private void moveBot() {
-        setAhead(500);
+    protected void moveBot() {
+        setAhead(500 * forwardOrBackwards);
 
         setTurnRightRadians(500);
     }
