@@ -129,9 +129,13 @@ public class PWNBOT4000 extends AdvancedRobot {
     }
 
     protected void moveBot() {
-        //setAhead(500); setTurnRightRadians(Math.PI / 180 * 3); if (true) return;
-
         Vector position = new Vector(getX(), getY());
+
+        Double skittyWallLimit = 100.0;
+        int skitEveryXTicks = 40; // TODO: Experiment with other values (40 currently best)
+        boolean awayFromWall = position.isInsideBox(skittyWallLimit, skittyWallLimit, getBattleFieldWidth() - skittyWallLimit, getBattleFieldHeight() - skittyWallLimit);
+        if ((getTime() % skitEveryXTicks == 0) && awayFromWall) forwardOrBackwards *= -1;
+
         Double leftLength = leftIntersection.clone().sub(position).length();
         Double rightLength = rightIntersection.clone().sub(position).length();
 
