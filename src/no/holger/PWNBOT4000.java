@@ -19,7 +19,7 @@ import static no.holger.Utils.clamp;
 public class PWNBOT4000 extends AdvancedRobot {
 
     private static final Double bulletPower = Rules.MAX_BULLET_POWER;
-    public static final int TICKS_BETWEEN_HISTORY = 3;
+    private static final int TICKS_BETWEEN_HISTORY = 1;
     private Vector leftIntersection;
     private Vector rightIntersection;
     private Long timeLastTurn = -10000L;
@@ -32,7 +32,29 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     private static Long ticksWithScannedRobot = 0L;
     private static Long totalTicks = 0L;
-    public static Double linearDeviationFactor = 2.0; // 3.8 is full speed and full turn
+
+    // depends on TICKS_BETWEEN_HISTORY
+
+    // if TICKS_BETWEEN_HISTORY = 3:
+    // 3.8 is full speed and full turn
+    // against predictionBot:
+    // 6.0 = 57%
+    // 4.3 = 60%
+    // 3.8 = 60%
+    // 3.0 = 58%
+    // 2.5 = 57%
+    // 2.0 = 57%
+
+    // if TICKS_BETWEEN_HISTORY = 1:
+    // 11.4 is full speed and full turn
+    // against predictionBot:
+    //  6.0 = 58%
+    // 10.0 = 60%
+    // 11.0 = 61%
+    // 11.4 = 63% (60% second time)
+    // 12.0 = 61%
+    // 13.0 = 60%
+    private static Double linearDeviationFactor = 11.4;
 
     public void run() {
         Colors.applyColors(this);
@@ -87,7 +109,7 @@ public class PWNBOT4000 extends AdvancedRobot {
         setDebugProperty("linearDeviationFactor", linearDeviationFactor);
     }
 
-    private void fireGun() {
+    protected void fireGun() {
         if (lastScannedRobotPosition != null) {
             Double angleBetween = getAngleBetweenExpectedHitAndGun();
             if (isTargetLocked() && angleBetween < 0.05) setFire(bulletPower);
@@ -305,7 +327,7 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     private Double getAngleBetweenExpectedHitAndGun() {
         Vector position = new Vector(getX(), getY());
-        double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower);
+        double nofTurnsForBulletToHit = lastScannedRobotPosition.distanceTo(position) / Rules.getBulletSpeed(bulletPower); // TODO: THis is not correct. It should be distance to target for bullet
         Vector targetGunDirection = getExpectedEnemyPosition(nofTurnsForBulletToHit).sub(position).normalize();
         Vector gunDirection = new Vector(getGunHeadingRadians());
         return gunDirection.angleTo(targetGunDirection);
