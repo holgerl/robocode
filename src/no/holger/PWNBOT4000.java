@@ -325,4 +325,28 @@ public class PWNBOT4000 extends AdvancedRobot {
 //            ahead(100);
 //        }
     }
+
+    public void onKeyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case VK_UP:
+            case VK_W:
+                linearDeviationFactor += 0.1;
+                break;
+
+            case VK_DOWN:
+            case VK_S:
+                linearDeviationFactor -= 0.1;
+                break;
+
+            case VK_RIGHT:
+            case VK_D:
+                // Arrow right key: turn direction = right
+                break;
+
+            case VK_LEFT:
+            case VK_A:
+                // Arrow left key: turn direction = left
+                break;
+        }
+    }
 }
