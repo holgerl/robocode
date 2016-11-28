@@ -158,8 +158,8 @@ public class PWNBOT4000 extends AdvancedRobot {
 
     private void calculateIntersections() {
         int spread = 20;
-        Vector left = new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * spread);
-        Vector right = new Vector(getHeadingRadians()).rotateLeft(-Math.PI / 180 * spread);
+        Vector left = new Vector(getHeadingRadians()).rotateLeft(Math.PI / 180 * spread).multiply(forwardOrBackwards);
+        Vector right = new Vector(getHeadingRadians()).rotateLeft(-Math.PI / 180 * spread).multiply(forwardOrBackwards);
 
         Vector position = new Vector(getX(), getY());
         Ray leftRay = new Ray(position, left);
