@@ -12,7 +12,7 @@ import java.util.List;
 
 import static no.holger.Utils.clamp;
 
-public class TargetPractice extends AdvancedRobot {
+public class TargetPracticeCircle extends AdvancedRobot {
 
     public void run() {
         Colors.applyColors(this);
