@@ -80,7 +80,11 @@ public class Vector {
     }
 
     public void drawLine(Vector endVector, Graphics2D g) {
-        g.setColor(java.awt.Color.RED);
+        drawLine(endVector, g, Color.RED);
+    }
+
+    public void drawLine(Vector endVector, Graphics2D g, Color color) {
+        g.setColor(color);
         g.drawLine(
                 (int) x,
                 (int) y,
