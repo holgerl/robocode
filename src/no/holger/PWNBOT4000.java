@@ -315,6 +315,9 @@ public class PWNBOT4000 extends AdvancedRobot {
             Vector radarDirection = new Vector(getRadarHeadingRadians());
             Double angleBetween = radarDirection.angleTo(targetRadarDirection);
 
+            // 0.0 = 74%
+            // 10.0 = 72%
+            // 30.0 = 66%
             Double exaggeration = 0.0; // Exaggerate to scan past the enemy
 
             radians = angleBetween + Math.signum(angleBetween)* Math.PI/180*exaggeration;
@@ -343,25 +346,16 @@ public class PWNBOT4000 extends AdvancedRobot {
         return getExpectedEnemyPosition(nofTurnsForBulletToHit).distanceTo(position);
     }
 
-    public void onHitRobot(HitRobotEvent e) {
-//        // If he's in front of us, set back up a bit.
-//        if (e.getBearing() > -90 && e.getBearing() < 90) {
-//            back(100);
-//        } else { // else he's in back of us, so set ahead a bit.
-//            ahead(100);
-//        }
-    }
-
     public void onKeyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case VK_UP:
             case VK_W:
-                linearDeviationFactor += 0.1;
+                //linearDeviationFactor += 0.1;
                 break;
 
             case VK_DOWN:
             case VK_S:
-                linearDeviationFactor -= 0.1;
+                //linearDeviationFactor -= 0.1;
                 break;
 
             case VK_RIGHT:
@@ -375,4 +369,6 @@ public class PWNBOT4000 extends AdvancedRobot {
                 break;
         }
     }
+
+    public static void main(String[] args) {}
 }
